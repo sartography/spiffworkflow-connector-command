@@ -4,7 +4,7 @@ version = "0.2.0"
 description = "Make HTTP Requests available to SpiffWorkflow Service Tasks"
 authors = ["Jon Herron <jon.herron@yahoo.com>"]
 readme = "README.md"
-packages = [{include = "connector_command", from = "src" }]
+packages = [{include = "spiffworkflow_connector_command", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.9"
