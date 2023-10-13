@@ -13,7 +13,7 @@ else:
 
 
 class CommandErrorDict(TypedDict):
-    error_name: str
+    error_code: str
     message: str
 
 
@@ -26,10 +26,6 @@ class ConnectorProxyResponseDict(TypedDict):
 
     # these are printed to spiffworkflow-backend logs
     spiff__logs: NotRequired[list[str]| None]
-
-    # added by spiffworkflow-proxy if not set
-    # example: http/GetRequestV2
-    operator_id: NotRequired[str]
 
 
 class CommandResultDictV2(TypedDict):
