@@ -17,7 +17,7 @@ class CommandErrorDict(TypedDict):
     message: str
 
 
-class CommandResponseDict(TypedDict):
+class ConnectorProxyResponseDict(TypedDict):
     """This is passed back to spiffworkflow-backend as the response body."""
 
     # this is given to the service task as task data
@@ -32,9 +32,22 @@ class CommandResponseDict(TypedDict):
     operator_id: NotRequired[str]
 
 
-class CommandResultDict(TypedDict):
+class CommandResultDictV2(TypedDict):
     """spiffworkflow-proxy parses this result to determine what happended."""
-    response: CommandResponseDict
+
+    # allow returning string for backwards compatibility
+    response: ConnectorProxyResponseDict
+
+    status: int
+    mimetype: str
+
+
+class CommandResultDictV1(TypedDict):
+    """spiffworkflow-proxy parses this result to determine what happended."""
+
+    # allow returning string for backwards compatibility
+    response: str
+
     status: int
     mimetype: str
 
@@ -43,7 +56,7 @@ class ConnectorCommand(metaclass=abc.ABCMeta):
     """Abstract class to describe how to make a command."""
 
     @abc.abstractmethod
-    def execute(self, config: Any, task_data: dict) -> CommandResultDict:
+    def execute(self, config: Any, task_data: dict) -> CommandResultDictV1 | CommandResultDictV2:
         raise NotImplementedError("method must be implemented on subclass: execute")
 
     # this is not a required method but if it gets used then it must be overridden
