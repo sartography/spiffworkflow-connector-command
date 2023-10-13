@@ -1,26 +1,52 @@
 from __future__ import annotations
 
 import abc
+import sys
 from typing import Any
-from typing import TypedDict
+
+if sys.version_info < (3, 11):
+    from typing_extensions import NotRequired
+    from typing_extensions import TypedDict
+else:
+    from typing import NotRequired
+    from typing import TypedDict
+
+
+class CommandErrorDict(TypedDict):
+    error_name: str
+    message: str
 
 
 class CommandResponseDict(TypedDict):
-    response: dict
+    """This is passed back to spiffworkflow-backend as the response body."""
+
+    # this is given to the service task as task data
+    command_response: dict
+    error: CommandErrorDict | None
+
+    # these are printed to spiffworkflow-backend logs
+    spiff__logs: NotRequired[list[str]| None]
+
+    # added by spiffworkflow-proxy if not set
+    # example: http/GetRequestV2
+    operator_id: NotRequired[str]
+
+
+class CommandResultDict(TypedDict):
+    """spiffworkflow-proxy parses this result to determine what happended."""
+    response: CommandResponseDict
     status: int
+    mimetype: str
 
 
-class CommandInterface(metaclass=abc.ABCMeta):
+class ConnectorCommand(metaclass=abc.ABCMeta):
     """Abstract class to describe how to make a command."""
 
-    @classmethod
-    def __subclasshook__(cls, subclass: Any) -> bool:
-        return (
-            hasattr(subclass, "execute")
-            and callable(subclass.run)
-            and NotImplemented
-        )
-
     @abc.abstractmethod
-    def execute(self, config: Any, task_data: dict) -> CommandResponseDict:
+    def execute(self, config: Any, task_data: dict) -> CommandResultDict:
         raise NotImplementedError("method must be implemented on subclass: execute")
+
+    # this is not a required method but if it gets used then it must be overridden
+    def app_description(self, *args: Any, **kwargs: Any) -> dict:
+        """Return a dict to describe the connector. This is used only for authentication commands at the moment."""
+        raise NotImplementedError("method must be implemented on subclass: app_description")
